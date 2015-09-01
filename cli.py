@@ -20,13 +20,6 @@ def cli(verbose, env, dev_env):
                 'formatter': 'default',
             }
         },
-        'loggers': {
-            'glance': {
-                'level': logging.INFO,
-                'handlers': ['console'],
-                'propagate': False,
-            },
-        },
         'root': {
             'level': logging.DEBUG if verbose else logging.WARNING,
             'handlers': ['console'],
