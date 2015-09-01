@@ -6,6 +6,7 @@ import os
 from urllib import urlencode
 from honcho import environ
 
+
 @click.group()
 def cli():
     """ Run the CLI tool from the specified arguments. """
