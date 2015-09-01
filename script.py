@@ -64,17 +64,11 @@ def parse_videos_from_feed():
     """
 
     data = feedparser.parse(os.getenv('MTFV_MRSS_URL'))
-    videos = []
-    for i, video in enumerate(data.entries):
-        to_append = {
-            'title':            video['title'],
-            'description':      video['summary'],
-            'file_url':         video['media_content'][0]['url'],
-            'file_size':        video['media_content'][0]['filesize'],
-        }
-        # to_append['thumb'] = video['media_thumbnail']['url'] # Requires downloading and including in post body
-        videos.append( to_append )
-    return videos
+    return [{
+        'title': video['title'],
+        'description': video['summary'],
+        'file_url': video['media_content'][0]['url'],
+        'file_size': video['media_content'][0]['filesize']} for video in data.entries]
 
 def update_env(filename='.env'):
     """
