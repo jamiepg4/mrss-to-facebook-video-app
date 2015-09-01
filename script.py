@@ -98,7 +98,7 @@ def upload_video_to_facebook(video):
     from oauth import authorize_installed_app
 
     http = authorize_installed_app(
-        scope=('publish_actions'),
+        scope=('publish_actions',),
         env_key='FACEBOOK_OAUTH',
     )
 
