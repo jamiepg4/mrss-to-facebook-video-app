@@ -39,7 +39,6 @@ def cli():
 def oauth(secrets_path, token_path, scope):
     """Generate an OAuth token."""
     from oauth import get_credentials
-    print secrets_path
     get_credentials(scope, secrets_path, token_path)
 
 
