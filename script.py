@@ -1,10 +1,8 @@
 import click
 import feedparser
-import json
 import logging
 import logging.config
 import os
-import requests
 from urllib import urlencode
 from honcho import environ
 
