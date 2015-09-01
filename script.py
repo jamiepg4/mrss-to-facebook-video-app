@@ -1,17 +1,16 @@
 import click
 import feedparser
-import json
 import logging
 import logging.config
 import os
-import requests
 from urllib import urlencode
 from honcho import environ
+
 
 @click.group()
 def cli():
     """ Run the CLI tool from the specified arguments. """
-    update_env();
+    update_env()
     logging.config.dictConfig({
         'version': 1,
         'disable_existing_loggers': False,
@@ -49,10 +48,10 @@ cli.add_command(oauth)
 @click.command()
 def upload():
     """Upload videos to Facebook from MRSS feed"""
-    videos = parse_videos_from_feed();
+    videos = parse_videos_from_feed()
     logging.info("Found %d videos to upload" % len(videos))
     for video in videos:
-        upload_video_to_facebook( video )
+        upload_video_to_facebook(video)
 
 
 cli.add_command(upload)
@@ -70,6 +69,7 @@ def parse_videos_from_feed():
         'file_url': video['media_content'][0]['url'],
         'file_size': video['media_content'][0]['filesize']} for video in data.entries]
 
+
 def update_env(filename='.env'):
     """
     Update os.environ with variables from an .env file.
@@ -84,6 +84,7 @@ def update_env(filename='.env'):
     for k, v in envvars.items():
         os.environ[k] = v
 
+
 def upload_video_to_facebook(video):
     """
     Uploads a given video to Facebook Graph API
@@ -95,7 +96,6 @@ def upload_video_to_facebook(video):
         env_key='FACEBOOK_OAUTH',
     )
 
-    request_url = 'https://graph-video.facebook.com/v2.4/%s/videos' % ( os.getenv('MTFV_FACEBOOK_ENTITY_ID') )
-    response = http.request( request_url, method='POST', body=urlencode(video) )
+    request_url = 'https://graph-video.facebook.com/v2.4/%s/videos' % (os.getenv('MTFV_FACEBOOK_ENTITY_ID'))
+    response = http.request(request_url, method='POST', body=urlencode(video))
     logging.info(response)
-
