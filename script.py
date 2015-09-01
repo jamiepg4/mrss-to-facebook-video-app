@@ -8,7 +8,7 @@ import requests
 from honcho import environ
 
 @click.group()
-def cli(verbose, env, dev_env):
+def cli():
     """ Run the CLI tool from the specified arguments. """
     logging.config.dictConfig({
         'version': 1,
@@ -25,7 +25,7 @@ def cli(verbose, env, dev_env):
             }
         },
         'root': {
-            'level': logging.DEBUG if verbose else logging.WARNING,
+            'level': logging.DEBUG,
             'handlers': ['console'],
         }
     })
@@ -37,7 +37,7 @@ def cli(verbose, env, dev_env):
 @click.argument('scope', required=True, nargs=-1)
 def oauth(secrets_path, token_path, scope):
     """Generate an OAuth token."""
-    from .oauth import get_credentials
+    from oauth import get_credentials
     print secrets_path
     get_credentials(scope, secrets_path, token_path)
 
