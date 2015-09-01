@@ -50,6 +50,7 @@ def upload():
     """Upload videos to Facebook from MRSS feed"""
     update_env();
     videos = parse_videos_from_feed();
+    logging.info("Found %d videos to upload" % len(videos))
     for video in videos:
         upload_video_to_facebook( video )
 
