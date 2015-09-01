@@ -10,7 +10,7 @@ from honcho import environ
 @click.group()
 def cli():
     """ Run the CLI tool from the specified arguments. """
-    update_env();
+    update_env()
     logging.config.dictConfig({
         'version': 1,
         'disable_existing_loggers': False,
@@ -48,7 +48,7 @@ cli.add_command(oauth)
 @click.command()
 def upload():
     """Upload videos to Facebook from MRSS feed"""
-    videos = parse_videos_from_feed();
+    videos = parse_videos_from_feed()
     logging.info("Found %d videos to upload" % len(videos))
     for video in videos:
         upload_video_to_facebook( video )
