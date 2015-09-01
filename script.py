@@ -92,10 +92,15 @@ def upload_video_to_facebook(video):
     """
     Uploads a given video to Facebook Graph API
     """
+    from oauth import authorize_installed_app
+
+    http = authorize_installed_app(
+        scope=('publish_actions',),
+        env_key='FACEBOOK_OAUTH',
+    )
 
     request_url = 'https://graph-video.facebook.com/v2.3/%s/videos' % ( os.getenv('MTFV_FACEBOOK_ENTITY_ID') )
-    print request_url
     print video
-    response = requests.post( request_url, video )
-    print response
+    response = http.request( request_url, method='POST', body=video )
+    print response.json()
 
