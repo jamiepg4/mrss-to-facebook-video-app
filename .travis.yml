@@ -1,0 +1,9 @@
+sudo: false
+notifications:
+  on_success: never
+  on_failure: change
+language: python
+python:
+  - "3.4"
+install: "pip install -r requirements.txt"
+script: flake8 . --exclude=build,node_modules --ignore=E501
