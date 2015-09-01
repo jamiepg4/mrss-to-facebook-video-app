@@ -1,4 +1,7 @@
 sudo: false
+notifications:
+  on_success: never
+  on_failure: change
 language: python
 python:
   - "3.4"
