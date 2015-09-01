@@ -45,6 +45,18 @@ def oauth(secrets_path, token_path, scope):
 cli.add_command(oauth)
 
 
+@click.command()
+def upload():
+    """Upload videos to Facebook from MRSS feed"""
+    update_env();
+    videos = parse_videos_from_feed();
+    for video in videos:
+        upload_video_to_facebook( video )
+
+
+cli.add_command(upload)
+
+
 def parse_videos_from_feed():
     """
     Injest MRSS feed into local scope; format videos to FB upload spec
@@ -86,8 +98,3 @@ def upload_video_to_facebook(video):
     response = requests.post( request_url, video )
     print response
 
-
-update_env();
-videos = parse_videos_from_feed();
-for video in videos:
-    upload_video_to_facebook( video )
