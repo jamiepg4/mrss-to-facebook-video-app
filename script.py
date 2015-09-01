@@ -5,6 +5,7 @@ import logging
 import logging.config
 import os
 import requests
+from urllib import urlencode
 from honcho import environ
 
 @click.group()
@@ -66,10 +67,12 @@ def parse_videos_from_feed():
     data = feedparser.parse(os.getenv('MTFV_MRSS_URL'))
     videos = []
     for i, video in enumerate(data.entries):
-        to_append = {}
-        to_append['file_url'] = video['media_content'][0]['url']
-        to_append['file_size'] = video['media_content'][0]['filesize']
-        to_append['title'] = video['title']
+        to_append = {
+            'title':            video['title'],
+            'description':      video['summary'],
+            'file_url':         video['media_content'][0]['url'],
+            'file_size':        video['media_content'][0]['filesize'],
+        }
         # to_append['thumb'] = video['media_thumbnail']['url'] # Requires downloading and including in post body
         videos.append( to_append )
     return videos
@@ -95,12 +98,11 @@ def upload_video_to_facebook(video):
     from oauth import authorize_installed_app
 
     http = authorize_installed_app(
-        scope=('publish_actions',),
+        scope=('publish_actions'),
         env_key='FACEBOOK_OAUTH',
     )
 
-    request_url = 'https://graph-video.facebook.com/v2.3/%s/videos' % ( os.getenv('MTFV_FACEBOOK_ENTITY_ID') )
-    print video
-    response = http.request( request_url, method='POST', body=video )
-    print response.json()
+    request_url = 'https://graph-video.facebook.com/v2.4/%s/videos' % ( os.getenv('MTFV_FACEBOOK_ENTITY_ID') )
+    response = http.request( request_url, method='POST', body=urlencode(video) )
+    logging.info(response)
 
