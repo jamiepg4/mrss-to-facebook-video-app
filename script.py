@@ -79,7 +79,7 @@ def get_value(key):
     """
     r = get_redis()
     if r is not False:
-        r.get(key)
+        return r.get(key)
 
 
 def set_value(key, value):
