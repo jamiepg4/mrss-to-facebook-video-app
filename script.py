@@ -5,6 +5,7 @@ import logging.config
 import json
 import os
 import redis
+from utils import memoize
 from urllib import urlencode
 from honcho import environ
 
@@ -59,11 +60,36 @@ def upload():
 cli.add_command(upload)
 
 
+@memoize
 def get_redis():
     """
     Get the working redis instance
     """
-    return redis.StrictRedis(host='localhost', port=6379, db=0)
+
+    try:
+        redis = redis.StrictRedis(host='localhost', port=6379, db=0)
+    except Exception, e:
+        redis = False
+        logging.warning("redis unavailable. Uploaded videos will be duplicated on subsequent executions.")
+    return redis
+
+
+def get_value(key):
+    """
+    Get a value for a key in redis
+    """
+    r = get_redis()
+    if r != False:
+        r.get(key)
+
+
+def set_value(key, value):
+    """
+    Set a key=>value pair in redis
+    """
+    r = get_redis()
+    if r != False:
+        r.set(key, value)
 
 
 def parse_videos_from_feed():
@@ -78,7 +104,7 @@ def parse_videos_from_feed():
         'description': video['summary'],
         'file_name': video['originalfilename'],
         'file_url': video['media_content'][0]['url'],
-        'file_size': video['media_content'][0]['filesize']} for video in data.entries if not r.get(video['originalfilename'])]
+        'file_size': video['media_content'][0]['filesize']} for video in data.entries if not get_value(video['originalfilename'])]
 
 
 def update_env(filename='.env'):
@@ -111,5 +137,4 @@ def upload_video_to_facebook(video):
     response, content = http.request(request_url, method='POST', body=urlencode(video))
     logging.info(response)
     logging.info(content)
-    r = get_redis()
-    r.set(video['file_name'], json.loads(content)['id'])
+    set_value(video['file_name'], json.loads(content)['id'])
