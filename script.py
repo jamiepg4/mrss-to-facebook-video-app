@@ -66,7 +66,7 @@ def get_redis():
     Get the working redis instance
     """
     try:
-        r = redis.StrictRedis(host='localhost', port=6379, db=0)
+        r = redis.StrictRedis(host=os.getenv('REDIS_HOST', 'localhost'), port=os.getenv('REDIS_PORT', 6379), db=0)
     except Exception:
         r = False
         logging.warning("redis unavailable. Uploaded videos will be duplicated on subsequent executions.")
