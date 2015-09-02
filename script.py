@@ -65,13 +65,12 @@ def get_redis():
     """
     Get the working redis instance
     """
-
     try:
-        redis = redis.StrictRedis(host='localhost', port=6379, db=0)
-    except Exception, e:
-        redis = False
+        r = redis.StrictRedis(host='localhost', port=6379, db=0)
+    except Exception:
+        r = False
         logging.warning("redis unavailable. Uploaded videos will be duplicated on subsequent executions.")
-    return redis
+    return r
 
 
 def get_value(key):
@@ -79,7 +78,7 @@ def get_value(key):
     Get a value for a key in redis
     """
     r = get_redis()
-    if r != False:
+    if r is not False:
         r.get(key)
 
 
@@ -88,7 +87,7 @@ def set_value(key, value):
     Set a key=>value pair in redis
     """
     r = get_redis()
-    if r != False:
+    if r is not False:
         r.set(key, value)
 
 
@@ -96,9 +95,7 @@ def parse_videos_from_feed():
     """
     Injest MRSS feed into local scope; format videos to FB upload spec
     """
-
     data = feedparser.parse(os.getenv('MTFV_MRSS_URL'))
-    r = get_redis()
     return [{
         'title': video['title'],
         'description': video['summary'],
