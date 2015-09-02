@@ -70,7 +70,7 @@ Second, generate the credentials and write them to a `facebook-creds.json` file:
 $ mtfv oauth facebook_client_secrets.json facebook-creds.json publish_actions
 ```
 
-This will open a browser window, asking you to approve the request, which you should.
+This will open a browser window, asking you to approve the request, which you should. Your Facebook user will need the `publish_actions` capability for whichever Facebook entity you intend to publish to.
 
 ## Running on Heroku
 
