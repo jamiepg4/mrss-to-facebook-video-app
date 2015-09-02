@@ -2,7 +2,10 @@ import click
 import feedparser
 import logging
 import logging.config
+import json
 import os
+import redis
+from utils import memoize
 from urllib import urlencode
 from honcho import environ
 
@@ -57,17 +60,48 @@ def upload():
 cli.add_command(upload)
 
 
+@memoize
+def get_redis():
+    """
+    Get the working redis instance
+    """
+    try:
+        r = redis.StrictRedis(host=os.getenv('REDIS_HOST', 'localhost'), port=os.getenv('REDIS_PORT', 6379), password=os.getenv('REDIS_PASSWORD'), db=0)
+    except Exception:
+        r = False
+        logging.warning("redis unavailable. Uploaded videos will be duplicated on subsequent executions.")
+    return r
+
+
+def get_value(key):
+    """
+    Get a value for a key in redis
+    """
+    r = get_redis()
+    if r is not False:
+        return r.get(key)
+
+
+def set_value(key, value):
+    """
+    Set a key=>value pair in redis
+    """
+    r = get_redis()
+    if r is not False:
+        r.set(key, value)
+
+
 def parse_videos_from_feed():
     """
     Injest MRSS feed into local scope; format videos to FB upload spec
     """
-
     data = feedparser.parse(os.getenv('MTFV_MRSS_URL'))
     return [{
         'title': video['title'],
         'description': video['summary'],
+        'guid': video['guid'],
         'file_url': video['media_content'][0]['url'],
-        'file_size': video['media_content'][0]['filesize']} for video in data.entries]
+        'file_size': video['media_content'][0]['filesize']} for video in data.entries if not get_value(video['guid'])]
 
 
 def update_env(filename='.env'):
@@ -97,5 +131,7 @@ def upload_video_to_facebook(video):
     )
 
     request_url = 'https://graph-video.facebook.com/v2.4/%s/videos' % (os.getenv('MTFV_FACEBOOK_ENTITY_ID'))
-    response = http.request(request_url, method='POST', body=urlencode(video))
+    response, content = http.request(request_url, method='POST', body=urlencode(video))
     logging.info(response)
+    logging.info(content)
+    set_value(video['guid'], json.loads(content)['id'])
