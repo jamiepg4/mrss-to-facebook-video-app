@@ -44,7 +44,27 @@ See `.env.sample` for expected environment variables.
 
 OAuth tokens are needed to authorize requests to Facebook. They are stored as environment variables as well.
 
-First we need to generate the credentials:
+First, put your Facebook application client ID and secret in a `facebook_client_secrets.json` file formatted like this:
+
+```json
+{
+  "installed": {
+    "client_id": "REPLACE_WITH_YOUR_FACEBOOK_CLIENT_ID",
+    "client_secret": "REPLACE_WITH_YOUR_FACEBOOK_CLIENT_SECRET",
+    "client_email": "",
+    "client_x509_cert_url": "",
+    "token_uri": "https://graph.facebook.com/v2.1/oauth/access_token",
+    "auth_uri": "https://www.facebook.com/dialog/oauth",
+    "auth_provider_x509_cert_url": "",
+    "redirect_uris": [
+      "urn:ietf:wg:oauth:2.0:oob",
+      "oob"
+    ]
+  }
+}
+```
+
+Second, generate the credentials and write them to a `facebook-creds.json` file:
 
 ```bash
 $ mtfv oauth facebook_client_secrets.json facebook-creds.json publish_actions
