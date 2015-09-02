@@ -99,9 +99,9 @@ def parse_videos_from_feed():
     return [{
         'title': video['title'],
         'description': video['summary'],
-        'file_name': video['originalfilename'],
+        'guid': video['guid'],
         'file_url': video['media_content'][0]['url'],
-        'file_size': video['media_content'][0]['filesize']} for video in data.entries if not get_value(video['originalfilename'])]
+        'file_size': video['media_content'][0]['filesize']} for video in data.entries if not get_value(video['guid'])]
 
 
 def update_env(filename='.env'):
@@ -134,4 +134,4 @@ def upload_video_to_facebook(video):
     response, content = http.request(request_url, method='POST', body=urlencode(video))
     logging.info(response)
     logging.info(content)
-    set_value(video['file_name'], json.loads(content)['id'])
+    set_value(video['guid'], json.loads(content)['id'])
