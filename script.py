@@ -67,6 +67,7 @@ def get_redis():
     """
     try:
         r = redis.StrictRedis(host=os.getenv('REDIS_HOST', 'localhost'), port=os.getenv('REDIS_PORT', 6379), password=os.getenv('REDIS_PASSWORD'), db=0)
+        r.get('test123')
     except Exception:
         r = False
         logging.warning("redis unavailable. Uploaded videos will be duplicated on subsequent executions.")
