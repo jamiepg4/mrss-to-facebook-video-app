@@ -66,7 +66,7 @@ def get_facebook_session():
         client_id=os.getenv('FACEBOOK_CLIENT_ID'),
         client_secret=os.getenv('FACEBOOK_CLIENT_SECRET'),
         access_token=os.getenv('FACEBOOK_AUTH_TOKEN'),
-        )
+    )
 
 
 @memoize
