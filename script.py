@@ -5,6 +5,7 @@ import logging.config
 import json
 import os
 import redis
+import requests
 from rauth import OAuth2Session
 from utils import memoize
 from honcho import environ
@@ -111,7 +112,8 @@ def parse_videos_from_feed():
         'description': video['summary'],
         'guid': video['guid'],
         'file_url': video['media_content'][0]['url'],
-        'file_size': video['media_content'][0]['filesize']} for video in data.entries if not get_value(video['guid'])]
+        'file_size': video['media_content'][0]['filesize'],
+        'thumb_url': video['media_thumbnail'][0]['url']} for video in data.entries if not get_value(video['guid'])]
 
 
 def update_env(filename='.env'):
@@ -138,5 +140,19 @@ def upload_video_to_facebook(video):
 
     request_url = 'https://graph-video.facebook.com/v2.4/%s/videos' % (os.getenv('MTFV_FACEBOOK_ENTITY_ID'))
     response = session.post(request_url, data=video)
+    if response.status_code is not 200:
+        logging.warning(json.loads(response.content)['error']['message'])
+        return
     logging.info(response.content)
     set_value(video['guid'], json.loads(response.content)['id'])
+    if video['thumb_url']:
+        data = {
+            'id': json.loads(response.content)['id'],
+            'is_preferred': True,
+        }
+        files = {}
+        thumb_response = requests.get(video['thumb_url'])
+        files['source'] = thumb_response.content
+        request_url = 'https://graph-video.facebook.com/v2.4/%s/thumbnails' % (json.loads(response.content)['id'])
+        response = session.post(request_url, data=data, files=files)
+        logging.info(response.content)
