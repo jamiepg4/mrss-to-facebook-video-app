@@ -7,7 +7,6 @@ import os
 import redis
 from rauth import OAuth2Session
 from utils import memoize
-from urllib import urlencode
 from honcho import environ
 
 
