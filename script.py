@@ -63,11 +63,25 @@ cli.add_command(upload)
 
 @memoize
 def get_facebook_session():
-    return OAuth2Session(
+    session = OAuth2Session(
         client_id=os.getenv('FACEBOOK_CLIENT_ID'),
         client_secret=os.getenv('FACEBOOK_CLIENT_SECRET'),
         access_token=os.getenv('FACEBOOK_AUTH_TOKEN'),
     )
+    request_url = "https://graph.facebook.com/%s?metadata=1" % (os.getenv('MTFV_FACEBOOK_ENTITY_ID'))
+    response = session.get(request_url)
+    if json.loads(response.content)['metadata']['type'] == 'page':
+        response = session.get('https://graph.facebook.com/%s/accounts' % (os.getenv('MTFV_FACEBOOK_USER_ID')))
+        data = [page for page in json.loads(response.content)['data'] if page['id'] == os.getenv('MTFV_FACEBOOK_ENTITY_ID')]
+        if not data:
+            logging.error("Facebook user account doesn't have access token for page.")
+            exit()
+        session = OAuth2Session(
+            client_id=os.getenv('FACEBOOK_CLIENT_ID'),
+            client_secret=os.getenv('FACEBOOK_CLIENT_SECRET'),
+            access_token=data[0]['access_token'],
+        )
+    return session
 
 
 @memoize
