@@ -64,13 +64,19 @@ First, put your Facebook application client ID and secret in a `facebook_client_
 }
 ```
 
-Second, generate the credentials and write them to a `facebook-creds.json` file:
+Second, generate the credentials and write them to a `facebook-creds.json` file. If you want to publish to a Facebook page, you'll need to request `publish_actions`, `manage_pages` and `publish_pages`:
+
+```bash
+$ mtfv oauth facebook_client_secrets.json facebook-creds.json publish_actions manage_pages publish_pages
+```
+
+Otherwise, you can just request `publish_actions`:
 
 ```bash
 $ mtfv oauth facebook_client_secrets.json facebook-creds.json publish_actions
 ```
 
-This will open a browser window, asking you to approve the request, which you should. Your Facebook user will need the `publish_actions` capability for whichever Facebook entity you intend to publish to.
+This will open a browser window, asking you to approve the request, which you should.
 
 ## Running on Heroku
 
