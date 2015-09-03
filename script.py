@@ -5,6 +5,7 @@ import logging.config
 import json
 import os
 import redis
+from rauth import OAuth2Session
 from utils import memoize
 from urllib import urlencode
 from honcho import environ
@@ -58,6 +59,15 @@ def upload():
 
 
 cli.add_command(upload)
+
+
+@memoize
+def get_facebook_session():
+    return OAuth2Session(
+        client_id=os.getenv('FACEBOOK_CLIENT_ID'),
+        client_secret=os.getenv('FACEBOOK_CLIENT_SECRET'),
+        access_token=os.getenv('FACEBOOK_AUTH_TOKEN'),
+        )
 
 
 @memoize
@@ -124,15 +134,10 @@ def upload_video_to_facebook(video):
     """
     Uploads a given video to Facebook Graph API
     """
-    from oauth import authorize_installed_app
 
-    http = authorize_installed_app(
-        scope=('publish_actions',),
-        env_key='FACEBOOK_OAUTH',
-    )
+    session = get_facebook_session()
 
     request_url = 'https://graph-video.facebook.com/v2.4/%s/videos' % (os.getenv('MTFV_FACEBOOK_ENTITY_ID'))
-    response, content = http.request(request_url, method='POST', body=urlencode(video))
-    logging.info(response)
-    logging.info(content)
-    set_value(video['guid'], json.loads(content)['id'])
+    response = session.post(request_url, data=video)
+    logging.info(response.content)
+    set_value(video['guid'], json.loads(response.content)['id'])

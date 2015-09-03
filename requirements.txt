@@ -3,5 +3,6 @@ feedparser==5.2.1
 flake8==2.4.0
 honcho==0.6.6
 oauth2client==1.4.11
+rauth==0.7.1
 requests==2.7.0
 redis==2.10.3
