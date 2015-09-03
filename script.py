@@ -151,22 +151,15 @@ def upload_video_to_facebook(video):
     """
 
     session = get_facebook_session()
+    files = {}
+    if video['thumb_url']:
+        thumb_response = requests.get(video['thumb_url'])
+        files['thumb'] = thumb_response.content
 
     request_url = 'https://graph-video.facebook.com/v2.4/%s/videos' % (os.getenv('MTFV_FACEBOOK_ENTITY_ID'))
-    response = session.post(request_url, data=video)
+    response = session.post(request_url, data=video, files=files)
     if response.status_code is not 200:
         logging.warning(json.loads(response.content)['error']['message'])
         return
     logging.info(response.content)
     set_value(video['guid'], json.loads(response.content)['id'])
-    if video['thumb_url']:
-        data = {
-            'id': json.loads(response.content)['id'],
-            'is_preferred': True,
-        }
-        files = {}
-        thumb_response = requests.get(video['thumb_url'])
-        files['source'] = thumb_response.content
-        request_url = 'https://graph-video.facebook.com/v2.4/%s/thumbnails' % (json.loads(response.content)['id'])
-        response = session.post(request_url, data=data, files=files)
-        logging.info(response.content)
