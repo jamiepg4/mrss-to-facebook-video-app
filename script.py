@@ -157,7 +157,7 @@ def upload_video_to_facebook(video):
 
     request_url = 'https://graph-video.facebook.com/v2.4/%s/videos' % (os.getenv('MTFV_FACEBOOK_ENTITY_ID'))
     response = session.post(request_url, data=video, files=files)
-    if response.status_code is not 200:
+    if not response.ok:
         logging.warning(response.json()['error']['message'])
         return
     logging.info(response.content)
