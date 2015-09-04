@@ -2,9 +2,9 @@ import click
 import feedparser
 import logging
 import logging.config
-import json
 import os
 import redis
+import requests
 from rauth import OAuth2Session
 from utils import memoize
 from honcho import environ
@@ -62,11 +62,25 @@ cli.add_command(upload)
 
 @memoize
 def get_facebook_session():
-    return OAuth2Session(
+    session = OAuth2Session(
         client_id=os.getenv('FACEBOOK_CLIENT_ID'),
         client_secret=os.getenv('FACEBOOK_CLIENT_SECRET'),
         access_token=os.getenv('FACEBOOK_AUTH_TOKEN'),
     )
+    request_url = "https://graph.facebook.com/%s?metadata=1" % (os.getenv('MTFV_FACEBOOK_ENTITY_ID'))
+    response = session.get(request_url)
+    if response.json()['metadata']['type'] == 'page':
+        response = session.get('https://graph.facebook.com/%s/accounts' % (os.getenv('MTFV_FACEBOOK_USER_ID')))
+        data = [page for page in response.json()['data'] if page['id'] == os.getenv('MTFV_FACEBOOK_ENTITY_ID')]
+        if not data:
+            logging.error("Facebook user account doesn't have access token for page.")
+            exit()
+        session = OAuth2Session(
+            client_id=os.getenv('FACEBOOK_CLIENT_ID'),
+            client_secret=os.getenv('FACEBOOK_CLIENT_SECRET'),
+            access_token=data[0]['access_token'],
+        )
+    return session
 
 
 @memoize
@@ -111,7 +125,8 @@ def parse_videos_from_feed():
         'description': video['summary'],
         'guid': video['guid'],
         'file_url': video['media_content'][0]['url'],
-        'file_size': video['media_content'][0]['filesize']} for video in data.entries if not get_value(video['guid'])]
+        'file_size': video['media_content'][0]['filesize'],
+        'thumb_url': video['media_thumbnail'][0]['url']} for video in data.entries if not get_value(video['guid'])]
 
 
 def update_env(filename='.env'):
@@ -135,8 +150,15 @@ def upload_video_to_facebook(video):
     """
 
     session = get_facebook_session()
+    files = {}
+    if video['thumb_url']:
+        thumb_response = requests.get(video['thumb_url'])
+        files['thumb'] = thumb_response.content
 
     request_url = 'https://graph-video.facebook.com/v2.4/%s/videos' % (os.getenv('MTFV_FACEBOOK_ENTITY_ID'))
-    response = session.post(request_url, data=video)
+    response = session.post(request_url, data=video, files=files)
+    if not response.ok:
+        logging.warning(response.json()['error']['message'])
+        return
     logging.info(response.content)
-    set_value(video['guid'], json.loads(response.content)['id'])
+    set_value(video['guid'], response.json()['id'])
