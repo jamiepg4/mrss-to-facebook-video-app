@@ -121,7 +121,7 @@ def parse_videos_from_feed():
     Injest MRSS feed into local scope; format videos to FB upload spec
     """
     data = feedparser.parse(os.getenv('MTFV_MRSS_URL'))
-    h = HTMLParser.HTMLParser()
+    h = HTMLParser()
     return [{
         'title': h.unescape(video['title']),
         'description': h.unescape(video['summary']),
