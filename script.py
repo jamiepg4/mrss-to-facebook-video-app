@@ -123,8 +123,8 @@ def parse_videos_from_feed():
     data = feedparser.parse(os.getenv('MTFV_MRSS_URL'))
     h = HTMLParser.HTMLParser()
     return [{
-        'title': h.unescape( video['title'] ),
-        'description': h.unescape( video['summary'] ),
+        'title': h.unescape(video['title']),
+        'description': h.unescape(video['summary']),
         'guid': video['guid'],
         'file_url': video['media_content'][0]['url'],
         'file_size': video['media_content'][0]['filesize'],
