@@ -1,5 +1,6 @@
 import click
 import feedparser
+import HTMLParser
 import logging
 import logging.config
 import os
@@ -120,9 +121,10 @@ def parse_videos_from_feed():
     Injest MRSS feed into local scope; format videos to FB upload spec
     """
     data = feedparser.parse(os.getenv('MTFV_MRSS_URL'))
+    h = HTMLParser.HTMLParser()
     return [{
-        'title': video['title'],
-        'description': video['summary'],
+        'title': h.unescape( video['title'] ),
+        'description': h.unescape( video['summary'] ),
         'guid': video['guid'],
         'file_url': video['media_content'][0]['url'],
         'file_size': video['media_content'][0]['filesize'],
