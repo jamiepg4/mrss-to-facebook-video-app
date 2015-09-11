@@ -1,12 +1,12 @@
 import click
 import feedparser
-import HTMLParser
 import logging
 import logging.config
 import os
 import redis
 import requests
 from rauth import OAuth2Session
+from html.parser import HTMLParser
 from utils import memoize
 from honcho import environ
 
