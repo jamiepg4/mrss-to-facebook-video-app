@@ -40,6 +40,8 @@ pip install -r requirements.txt
 
 See `.env.sample` for expected environment variables.
 
+Use `SLACK_WEBHOOK_URL`, `SLACK_CHANNEL_SUCCESS` and `SLACK_CHANNEL_ERROR` to send success and error messages to Slack. The webhook URL is required for either success or error, but both success and error are optional. Pick which you'd like to pay attention to. Each channel variable expects the human-readable value (e.g. `#errors`).
+
 ### Generating OAuth tokens
 
 OAuth tokens are needed to authorize requests to Facebook. They are stored as environment variables as well.
