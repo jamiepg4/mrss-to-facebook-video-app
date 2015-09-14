@@ -164,7 +164,3 @@ def upload_video_to_facebook(video):
         return
     logging.info(response.content)
     set_value(video['guid'], response.json()['id'])
-
-
-if __name__ == "__main__":
-    upload()

@@ -1,1 +1,1 @@
-worker: python script.py
+worker: mtfv upload

@@ -7,6 +7,7 @@ setup(
     author='Fusion',
     author_email='tech@fusion.net',
     url='https://github.com/fusioneng/mrss-to-facebook-video-app',
+    py_modules=['script', 'oauth', 'utils'],
     entry_points={
         'console_scripts': [
             'mtfv=script:cli'
