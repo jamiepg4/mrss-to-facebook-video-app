@@ -9,6 +9,7 @@ from rauth import OAuth2Session
 from html.parser import HTMLParser
 from utils import memoize
 from honcho import environ
+from slack import slack_info_message, slack_error_message
 
 
 @click.group()
@@ -74,7 +75,9 @@ def get_facebook_session():
         response = session.get('https://graph.facebook.com/%s/accounts' % (os.getenv('MTFV_FACEBOOK_USER_ID')))
         data = [page for page in response.json()['data'] if page['id'] == os.getenv('MTFV_FACEBOOK_ENTITY_ID')]
         if not data:
-            logging.error("Facebook user account doesn't have access token for page.")
+            message = "Facebook user account doesn't have access token for page."
+            logging.error(message)
+            slack_error_message(message)
             exit()
         session = OAuth2Session(
             client_id=os.getenv('FACEBOOK_CLIENT_ID'),
@@ -94,7 +97,9 @@ def get_redis():
         r.get('test123')
     except Exception:
         r = False
-        logging.warning("redis unavailable. Uploaded videos will be duplicated on subsequent executions.")
+        message = "redis unavailable. Uploaded videos will be duplicated on subsequent executions."
+        logging.warning(message)
+        slack_error_message(message)
     return r
 
 
@@ -161,6 +166,8 @@ def upload_video_to_facebook(video):
     response = session.post(request_url, data=video, files=files)
     if not response.ok:
         logging.warning(response.json()['error']['message'])
+        slack_error_message(response.json()['error']['message'])
         return
     logging.info(response.content)
+    slack_info_message('Uploaded "%s" to https://facebook.com/%s' % (video['title'], response.json()['id']))
     set_value(video['guid'], response.json()['id'])
