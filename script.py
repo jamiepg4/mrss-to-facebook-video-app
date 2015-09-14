@@ -143,6 +143,8 @@ def update_env(filename='.env'):
     Parameters:
         filename (Optional[str]): the name of the .env file. Defaults to '.env'.
     """
+    if not os.path.isfile(filename):
+        return
     with open(filename) as f:
         content = f.read()
     envvars = environ.parse(content)
