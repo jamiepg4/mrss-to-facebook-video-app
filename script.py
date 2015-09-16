@@ -127,13 +127,20 @@ def parse_videos_from_feed():
     """
     data = feedparser.parse(os.getenv('MTFV_MRSS_URL'))
     h = HTMLParser()
-    return [{
-        'title': h.unescape(video['title']),
-        'description': h.unescape(video['summary']),
-        'guid': video['guid'],
-        'file_url': video['media_content'][0]['url'],
-        'file_size': video['media_content'][0]['filesize'],
-        'thumb_url': video['media_thumbnail'][0]['url']} for video in data.entries if not get_value(video['guid'])]
+    videos = []
+    for video in data.entries:
+        if get_value(video['guid']):
+            continue
+        formatted_video = {
+            'title': h.unescape(video['title']),
+            'description': h.unescape(video['summary']),
+            'guid': video['guid'],
+            'file_url': video['media_content'][0]['url'],
+            'file_size': video['media_content'][0]['filesize'],
+            'thumb_url': video['media_thumbnail'][0]['url']
+        }
+        videos.append(formatted_video)
+    return videos
 
 
 def update_env(filename='.env'):
