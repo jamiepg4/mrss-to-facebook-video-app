@@ -3,8 +3,10 @@ import feedparser
 import logging
 import logging.config
 import os
+import pytz
 import redis
 import requests
+from dateutil.parser import parse
 from rauth import OAuth2Session
 from html.parser import HTMLParser
 from utils import memoize
@@ -139,6 +141,14 @@ def parse_videos_from_feed():
             'file_size': video['media_content'][0]['filesize'],
             'thumb_url': video['media_thumbnail'][0]['url']
         }
+        if os.getenv('MRSS_SCHEDULED_DATETIME_ELEMENT') and os.getenv('MRSS_SCHEDULED_DATETIME_TIMEZONE') and video[os.getenv('MRSS_SCHEDULED_DATETIME_ELEMENT')]:
+            formatted_video['published'] = 0
+            formatted_video['unpublished_content_type'] = 'SCHEDULED'
+            native = parse(video[os.getenv('MRSS_SCHEDULED_DATETIME_ELEMENT')])
+            local = pytz.timezone(os.getenv('MRSS_SCHEDULED_DATETIME_TIMEZONE'))
+            local_dt = local.localize(native, is_dst=None)
+            utc_dt = local_dt.astimezone(pytz.utc)
+            formatted_video['scheduled_publish_time'] = utc_dt.strftime('%s')
         videos.append(formatted_video)
     return videos
 
