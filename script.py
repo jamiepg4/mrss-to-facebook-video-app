@@ -5,6 +5,7 @@ import logging.config
 import os
 import redis
 import requests
+from dateutil.parser import parse
 from rauth import OAuth2Session
 from html.parser import HTMLParser
 from utils import memoize
@@ -127,13 +128,25 @@ def parse_videos_from_feed():
     """
     data = feedparser.parse(os.getenv('MTFV_MRSS_URL'))
     h = HTMLParser()
-    return [{
-        'title': h.unescape(video['title']),
-        'description': h.unescape(video['summary']),
-        'guid': video['guid'],
-        'file_url': video['media_content'][0]['url'],
-        'file_size': video['media_content'][0]['filesize'],
-        'thumb_url': video['media_thumbnail'][0]['url']} for video in data.entries if not get_value(video['guid'])]
+    videos = []
+    for video in data.entries:
+        if get_value(video['guid']):
+            continue
+        formatted_video = {
+            'title': h.unescape(video['title']),
+            'description': h.unescape(video['summary']),
+            'guid': video['guid'],
+            'file_url': video['media_content'][0]['url'],
+            'file_size': video['media_content'][0]['filesize'],
+            'thumb_url': video['media_thumbnail'][0]['url']
+        }
+        if os.getenv('MRSS_SCHEDULED_DATETIME_ELEMENT') and video[os.getenv('MRSS_SCHEDULED_DATETIME_ELEMENT')]:
+            formatted_video['published'] = 0
+            formatted_video['unpublished_content_type'] = 'SCHEDULED'
+            datetime = parse(video[os.getenv('MRSS_SCHEDULED_DATETIME_ELEMENT')])
+            formatted_video['scheduled_publish_time'] = datetime.strftime('%s')
+        videos.append(formatted_video)
+    return videos
 
 
 def update_env(filename='.env'):
