@@ -143,9 +143,8 @@ def parse_videos_from_feed():
         if os.getenv('MRSS_SCHEDULED_DATETIME_ELEMENT') and video[os.getenv('MRSS_SCHEDULED_DATETIME_ELEMENT')]:
             formatted_video['published'] = 0
             formatted_video['unpublished_content_type'] = 'SCHEDULED'
-            native = parse(video[os.getenv('MRSS_SCHEDULED_DATETIME_ELEMENT')])
-            local_dt = local.localize(native, is_dst=None)
-            formatted_video['scheduled_publish_time'] = native.strftime('%s')
+            datetime = parse(video[os.getenv('MRSS_SCHEDULED_DATETIME_ELEMENT')])
+            formatted_video['scheduled_publish_time'] = datetime.strftime('%s')
         videos.append(formatted_video)
     return videos
 
